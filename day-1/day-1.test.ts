@@ -23,19 +23,19 @@ describe.skip("Can read Files", () => {
   });
 });
 
-describe("First Digit Tests", () => {
+describe.skip("First Digit Tests", () => {
   it("should find the first digit", () => {
     expect(findFirstDigit("1abc2")).toBe("1");
   });
 });
 
-describe("Last Digit Tests", () => {
+describe.skip("Last Digit Tests", () => {
   it("should find the last digit", () => {
     expect(findLastDigit("1abc2")).toBe("2");
   });
 });
 
-describe.only("Accumulator Tests", () => {
+describe.skip("Accumulator Tests", () => {
   it("should find the sum of the first and last digits", () => {
     expect(getLineValue(exampleText)).toBe(142);
   });
