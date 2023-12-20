@@ -1,19 +1,4 @@
-import { readFile } from "fs/promises";
-
-export type GameDice = {
-  red: number;
-  blue: number;
-  green: number;
-};
-type Game = {
-  id: number;
-  selections?: string[];
-  confirmedDice?: GameDice;
-};
-
-const exampleText = await readFile("day-2/example.txt", { encoding: "utf-8" });
-
-const realText = await readFile("day-2/real.txt", { encoding: "utf-8" });
+import { Game, GameDice } from "./types";
 
 export const diceToCheck: GameDice = {
   red: 12,
@@ -27,8 +12,12 @@ export const cleanInput = (input: string): Game[] => {
     const game = {
       id: parseInt(changedline[0]),
       selections: changedline[1].split(";"),
+      confirmedDice: {
+        red: 0,
+        blue: 0,
+        green: 0,
+      },
     };
-    // console.log(game);
     return game;
   });
 };
@@ -38,46 +27,53 @@ const currentDice: GameDice = {
   green: 0,
 };
 export const setConfirmedDice = (game: Game): Game => {
-  return game?.selections?.map((selection) => {
+  if (!game || !game.selections) {
+    throw new Error("Invalid game or selections");
+  }
+  let updatedGame: Game = { ...game };
+  // Map over the selections and update the confirmedDice in the game
+  game.selections.forEach((selection) => {
     const dices = selection.split(",");
-    const updatedDice: GameDice = { ...currentDice }; // Create a new object to store the updated dice counts
+    const updatedDice: GameDice = { ...updatedGame.confirmedDice }; // Create a new object to store the updated dice counts
     for (let dice of dices) {
-      const [count, color] = dice.trim().split(" ");
-      if (updatedDice[color] < parseInt(count)) {
-        updatedDice[color] = parseInt(count);
+      const [count, colour] = dice.trim().split(" ");
+      if (updatedDice[colour] < parseInt(count)) {
+        updatedDice[colour] = parseInt(count);
       }
     }
-    let updatedGame: Game = {
-      ...game,
+    updatedGame = {
+      ...updatedGame,
       confirmedDice: updatedDice,
     };
-    return updatedGame;
   });
+  return updatedGame;
 };
 
-export const findValidGameId = (input: Game[]): number => {
+export const findValidGameIds = (input: Game[]): number[] => {
   const validGameId: number[] = [];
   for (let game of input) {
-    const { red, blue, green } = game.confirmedDice || {
-      red: 0,
-      blue: 0,
-      green: 0,
-    };
-    console.log(red, blue, green);
+    const { red, blue, green } = game.confirmedDice;
     if (
-      red === diceToCheck.red &&
-      blue === diceToCheck.blue &&
-      green === diceToCheck.green
+      red <= diceToCheck.red &&
+      blue <= diceToCheck.blue &&
+      green <= diceToCheck.green
     ) {
       validGameId.push(game.id);
     }
   }
-
-  const sum = validGameId.reduce((acc, curr) => acc + curr, 0);
-  return 0;
+  return validGameId;
 };
 
-const exampleGames = cleanInput(exampleText);
-const realGames = cleanInput(realText);
+export const sumOfValidGames = (input: number[]): number => {
+  return input.reduce((acc, curr) => acc + curr, 0);
+};
 
-const exampleGamesWithDice = setConfirmedDice(exampleGames[0]);
+export const findPowerOfCubes = (input: Game[]): number[] => {
+  let powerOfCubes: number[] = [];
+  for (let game of input) {
+    const { red, blue, green } = game.confirmedDice;
+    const power: number = red * blue * green;
+    powerOfCubes.push(power);
+  }
+  return powerOfCubes;
+};
